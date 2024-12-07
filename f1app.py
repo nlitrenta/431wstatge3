@@ -1,12 +1,14 @@
 import mysql.connector
 db = mysql.connector.connect(
     host= "localhost",
-    #user= ,
-    #passwd= ,
+    user= "nick",
+    passwd= "passwd",
     database="f1manager"
 )
 mycursor = db.cursor()
 mycursor.execute("SHOW TABLES")
+for tb in mycursor:
+    print(tb)
 print("This is a F1 manager application for the whaterver F1 season.")
 while True:
     print("Freatures")
@@ -71,7 +73,8 @@ while True:
             mycursor.execute(sql,(sn,))
             db.commit() 
     elif x == "4":
-        sql = "SELECT p.time, r.rname, p.team FROM pitstop p, race r WHERE p.roundnum = r.roundnum ORDER BY p.time DESC LIMIT 10"
+        sql = "SELECT pitstop.ptime, race.rname, pitstop.tname FROM pitstop, race WHERE pitstop.rnum = race.rnum ORDER BY pitstop.ptime ASC LIMIT 10"
+        #sql = "SELECT pitstop.ptime FROM pitstop"
         mycursor = db.cursor()
         mycursor.execute(sql)
         result = mycursor.fetchall()
@@ -79,7 +82,7 @@ while True:
         for row in result:
             print(row)
     elif x == "5":
-        sql = "SELECT d.dname, d.dnum, AVG(rp.position) AS avg_position FROM driver d, race_result rp WHERE d.dnum = rp.dnum GROUP BY rp.dnum ORDER BY avg_position DESC"
+        sql = "SELECT driver.fname, driver.lname, driver.dnum, AVG(race_results.pos) AS avg_position FROM driver, race_results WHERE driver.dnum = race_results.dnum GROUP BY race_results.dnum ORDER BY avg_position ASC"
         mycursor = db.cursor()
         mycursor.execute(sql)
         result = mycursor.fetchall()
@@ -87,7 +90,7 @@ while True:
         for row in result:
             print(row)
     elif x == "6":
-        sql = "SELECT c.engine, AVG(rp.position) AS avg_position FROM driver d, race_result rp, team t, car c WHERE rp.dnum = d.num AND d.tname = t.tname AND c.tname = t.tname GROUP BY c.engine ORDER BY avg_position DESC"
+        sql = "SELECT car.engine, AVG(race_results.pos) AS avg_position FROM driver, race_results, team, car WHERE race_results.dnum = driver.dnum AND driver.team = team.tname AND car.tname = team.tname GROUP BY car.engine ORDER BY avg_position ASC"
         mycursor = db.cursor()
         mycursor.execute(sql)
         result = mycursor.fetchall()
@@ -95,7 +98,7 @@ while True:
         for row in result:
             print(row)
     elif x == "7":
-        sql = "SELECT d.dname,t.tname,SUM(d.cnum + c.cnum) AS total_championships FROM driver d, team t WHERE d.tname = t.tname GROUP BY t.tname"
+        sql = "SELECT driver.fname, driver.lname,team.tname,SUM(driver.dchamps + team.tchamp) AS total_championships FROM driver, team WHERE driver.team = team.tname GROUP BY driver.dnum"
         mycursor = db.cursor()
         mycursor.execute(sql)
         result = mycursor.fetchall()
@@ -103,7 +106,7 @@ while True:
         for row in result:
             print(row)
     elif x == "8":
-        sql = "SELECT d.dnane, COUNT(rp.position) as win_amount FROM driver d, race_position rp WHERE d.dname = rp.dname AND rp.position = 1 GROUP BY rp.dname ORDER BY win_amount DESC"
+        sql = "SELECT driver.fname,driver.lname,driver.dnum, COUNT(race_results.pos) as win_amount FROM driver, race_results WHERE driver.dnum = race_results.dnum AND race_results.pos = 1 GROUP BY race_results.dnum ORDER BY win_amount DESC"
         mycursor = db.cursor()
         mycursor.execute(sql)
         result = mycursor.fetchall()
@@ -111,11 +114,11 @@ while True:
         for row in result:
             print(row)
     elif x == "9":
-        sql = "SELECT d.fname,d.lname,d.point,c.cname, b.bname,SUM(s.amount) AS sponsorship_money FROM driver d, team t, tboss b, car c, sponsor s WHERE d.tname = t.tname AND b.tname = t.tname AND c.tname = c.tname AND s.tname = t.name GROUP BY t.tname ORDER BY t.tpoint DESC"
+        sql = "SELECT driver.fname,driver.lname,car.cname, team.tname, SUM(sponsor.amount) AS total_sponsorship FROM car JOIN team ON car.tname = team.tname JOIN sponsor ON sponsor.tname = team.tname JOIN driver on driver.team = team.tname GROUP BY car.cname, team.tname,driver.fname,driver.lname ORDER BY team.tname,driver.fname,driver.lname"
         mycursor = db.cursor()
         mycursor.execute(sql)
         result = mycursor.fetchall()
-        print("Wins of drivers")
+        print("Performance report")
         for row in result:
             print(row)
     elif x == "10":
@@ -124,7 +127,7 @@ while True:
         points = input("Enter points to add:")
         try:
             mycursor = db.cursor("")
-            mycursor.execute("UPDATE driver SET point = point + %s WHERE dnum = %s"(points,dn))
+            mycursor.execute("UPDATE driver SET point = point + %s WHERE dnum = %s",(points,dn))
             mycursor.execute("UPDATE team SET point = point+ %s WHERE tname = %s",(points,tn))
             db.commit()
             print("Done")
