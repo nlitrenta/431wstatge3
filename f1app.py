@@ -5,11 +5,13 @@ db = mysql.connector.connect(
     passwd= "",#password of root or database user
     database="f1manager"
 )
+"""
 mycursor = db.cursor()
 mycursor.execute("SHOW TABLES")
 for tb in mycursor:
     print(tb)
-print("This is a F1 manager application for the whaterver F1 season.")
+"""
+print("This is a F1 manager application for the 2024 F1 season.")
 while True:
     print("Freatures")
     print("Enter 1 to modify drivers")
