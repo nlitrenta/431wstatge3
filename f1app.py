@@ -1,8 +1,8 @@
 import mysql.connector
 db = mysql.connector.connect(
     host= "localhost",
-    user= "",
-    passwd= "",
+    user= "",#username of root or database user
+    passwd= "",#password of root or database user
     database="f1manager"
 )
 mycursor = db.cursor()
@@ -24,28 +24,30 @@ while True:
     print("Enter 10 to update drivers and teams points")
     x = input("Enter response(enter q to terminate application): ")
     if x == "1":
-        print("Enter 1 to add a driver or 2 to update a driver to have no team")
+        print("Enter 1 to add a driver or 2 to update a driver to have a different team")
         d = input("Enter response(if you want to exit enter nothing):")
         if d == "1":
             print("Please enter the following values")
             fn = input("Driver firstname:")
             ln = input("Driver lastname:")
             dnum = input("Driver number:")
-            tn = input("Driver's teamname:")
+            tn = input("Driver's team:")
+            wins = input("Driver's wins:")
             dc = input("Number of Drivers Championships:")
             try:
                 mycursor = db.cursor()
-                sql = "INSERT INTO drivers VALUES (%s,%s,%s,%s,%s)"
-                mycursor.execute(sql,(fn,ln,dnum,tn,dc))
+                sql = "INSERT INTO driver(fname,lname,team,dnum,wins,dchamps) VALUES (%s,%s,%s,%s,%s,%s)"
+                mycursor.execute(sql,(fn,ln,tn,dnum,wins,dc))
                 db.commit()
             except mysql.connector.Error as err:
                 print("Failed operation due to ",err)
         elif d == "2":
             d2 = input("Enter driver number you want to update:")
+            newteam = input("Enter driver's new team:")
             try:
                 mycursor = db.cursor()
-                sql = "UPDATE driver SET team = NULL WHERE dnum = %s"
-                mycursor.execute(sql,(d2,))
+                sql = "UPDATE driver SET team = %s WHERE dnum = %s"
+                mycursor.execute(sql,(newteam,d2))
                 db.commit()
             except mysql.connector.Error as err:
                 print("Failed operation due to ",err)
@@ -58,8 +60,8 @@ while True:
         ptime = input("pitstop time in seconds:")
         try:
             mycursor = db.cursor()
-            sql = "INSERT INTO pitstop VALUES (%s,%s,%s,%s,%s)"
-            mycursor.execute(sql,(rn,tn,dnum,lnum,ptime))
+            sql = "INSERT INTO pitstop(tname,rnum,dnum,lap_pited,ptime) VALUES (%s,%s,%s,%s,%s)"
+            mycursor.execute(sql,(tn,rn,dnum,lnum,ptime))
             db.commit()
         except mysql.connector.Error as err:
             print("Failed operation due to ",err)
