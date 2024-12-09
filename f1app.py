@@ -1,8 +1,8 @@
 import mysql.connector
 db = mysql.connector.connect(
     host= "localhost",
-    user= "",#username of root or database user
-    passwd= "",#password of root or database user
+    user= "nick",#username of root or database user
+    passwd= "passwd",#password of root or database user
     database="f1manager"
 )
 """
@@ -13,7 +13,7 @@ for tb in mycursor:
 """
 print("This is a F1 manager application for the 2024 F1 season.")
 while True:
-    print("Freatures")
+    print("Features")
     print("Enter 1 to modify drivers")
     print("Enter 2 to add a pitstop")
     print("Enter 3 for add/remove sponsor")
@@ -141,13 +141,14 @@ while True:
         for row in result:
             print(row)
     elif x == "10":
+        print("You can leave one blank if you only want to add points to one for a driver or team")
         dn = input("Enter driver number:")
         tn = input("Enter team name:")
         points = input("Enter points to add:")
         try:
             mycursor = db.cursor("")
-            mycursor.execute("UPDATE driver SET points = points + %s WHERE dnum = %s",(points,dn))
             mycursor.execute("UPDATE team SET tpoint = tpoint+ %s WHERE tname = %s",(points,tn))
+            mycursor.execute("UPDATE driver SET points = points + %s WHERE dnum = %s",(points,dn))
             db.commit()
             print("Done")
         except mysql.connector.Error as err:
